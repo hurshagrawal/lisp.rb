@@ -1,6 +1,6 @@
 require 'pry'
 require 'readline'
-require 'env'
+require_relative 'env'
 
 class Lisp
   def repl(prompt = 'lisp-rb> ')
@@ -71,11 +71,12 @@ class Lisp
     end
 
     def evaluate(x, env = @global_env)
-      if false
-      else
+      if x.is_a?(Array)
         exps = x.map {|token| evaluate(token) }
-        procedure = exps.shift
+        procedure = env.get(exps.shift)
         procedure.call(*exps)
+      else
+        x
       end
     end
 
@@ -91,7 +92,7 @@ class Lisp
     def create_global_env
       env = Env.new
       env.update(
-        '+' => lambda { |*args| args.sum },
+        '+' => lambda { |*args| args.inject(0) {|sum, a| sum + a } },
         '-' => lambda { |a, b| a - b },
         '*' => lambda { |*args| args.inject(1) {|product, a| product * a } },
         '/' => lambda { |a, b| a / b },
